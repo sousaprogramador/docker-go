@@ -1,16 +1,13 @@
-FROM golang:1.14-alpine AS builder
+FROM golang:alpine as builder
 
 WORKDIR /go/src/app
-COPY ./go .
 
-RUN go get -d -v ./ ... && \
-  go install -v ./...
+COPY . .
 
-RUN go run fullcycle.go && \
-  go build fullcycle.go && \
-  ls
+RUN CGO_ENABLED=0 go build -o /app main.go
 
-FROM alpine:3.7
-COPY --from=builder /go/src/app  /go/src/app
-WORKDIR /go/src/app
-CMD ["./fullcycle"]
+FROM scratch
+
+COPY --from=builder /app /app
+
+CMD ["/app"]
